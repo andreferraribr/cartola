@@ -1,0 +1,61 @@
+---
+title: "Cartola Siafi Futebol Clube:"
+subtitle: "comparação entre receita e despesa dos clubes e dos órgão federais"
+output:
+  html_document:
+    code_folding: hide
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen=999)
+options(digits = 2)
+```
+
+
+```{r, message=FALSE}
+library(dplyr)
+library(readxl)
+library(ggplot2)
+library(stringr)
+library(plotly)
+```
+
+
+
+```{r}
+clubes <- read_excel("clubes.xlsx")
+```
+
+
+```{r}
+clubes<- clubes%>%
+  mutate (despesa = receita - resultado)%>%
+  mutate (absoluto = abs(resultado))%>%
+  mutate (tag = if_else(rank(-absoluto) > 5,   "", clube)  )
+```
+
+[https://vuorre.netlify.com/post/2017/01/04/how-to-create-within-subject-scatter-plots-in-r-with-ggplot2/]
+
+```{r}
+
+lims <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
+
+
+
+
+p_clubes <- plot_ly(clubes)%>%
+  ggplot +
+  geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto))+
+  scale_color_gradient2(midpoint=0, low="red", mid="gray",
+                     high="blue", space ="Lab" )+
+    geom_abline() +
+    scale_x_continuous("Despesa", limits = lims) +
+    scale_y_continuous("Receita", limits = lims) +
+    theme(aspect.ratio = 1)
+  
+
+p_clubes
+```
+
