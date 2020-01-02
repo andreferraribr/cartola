@@ -20,6 +20,7 @@ library(readxl)
 library(ggplot2)
 library(stringr)
 library(plotly)
+library(ggrepel)
 ```
 
 
@@ -47,15 +48,25 @@ lims <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
 
 p_clubes <- plot_ly(clubes)%>%
   ggplot +
-  geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto))+
+  geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto, label = tag))+
+  geom_text(aes ( x = despesa, y = receita, label = tag))+
   scale_color_gradient2(midpoint=0, low="red", mid="gray",
                      high="blue", space ="Lab" )+
     geom_abline() +
     scale_x_continuous("Despesa", limits = lims) +
     scale_y_continuous("Receita", limits = lims) +
     theme(aspect.ratio = 1)
+ 
   
 
 p_clubes
+```
+
+```{r}
+sp <- ggplot(clubes, aes(receita, despesa, label = tag))+
+  geom_point()
+ 
+# Add texts
+sp + geom_text()
 ```
 
