@@ -63,10 +63,29 @@ p_clubes
 ```
 
 ```{r}
-sp <- ggplot(clubes, aes(receita, despesa, label = tag))+
-  geom_point()
- 
-# Add texts
-sp + geom_text()
+gov <- read_excel("org.xlsx")
+colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org_sup", "org_cod","org","uf","uf_nome","muni_cod","muni","ug_cod","ug","vpd","vpa","result")
 ```
+
+
+```{r}
+
+gov%>% group_by(org_max)%>%
+  summarise( count = n())%>%
+  arrange(desc(count))
+
+p_org<- plot_ly(gov)%>%
+  group_by(org_max)%>%
+  summarise( count = n())%>%
+  ggplot+
+  geom_col(aes(y = count, x = reorder (org_max, count)))+
+  coord_flip()
+
+p_org
+
+
+
+
+```
+
 
