@@ -48,7 +48,7 @@ lims <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
 
 p_clubes <- plot_ly(clubes)%>%
   ggplot +
-  geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto, label = tag))+
+  geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto, label = clube))+
   geom_text(aes ( x = despesa, y = receita, label = tag))+
   scale_color_gradient2(midpoint=0, low="red", mid="gray",
                      high="blue", space ="Lab" )+
@@ -57,14 +57,19 @@ p_clubes <- plot_ly(clubes)%>%
     scale_y_continuous("Receita", limits = lims) +
     theme(aspect.ratio = 1)
  
-  
+chart_link = api_create(p_clubes, filename="clubes")
+chart_link  
 
 p_clubes
 ```
 
 ```{r}
 gov <- read_excel("org.xlsx")
-colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org_sup", "org_cod","org","uf","uf_nome","muni_cod","muni","ug_cod","ug","vpd","vpa","result")
+colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org_sup", "org_cod","org","uf","uf_nome","muni_cod","muni","ug_cod","ug","despesa","receita","resultado")
+
+
+
+
 ```
 
 
@@ -81,6 +86,8 @@ p_org<- plot_ly(gov)%>%
   geom_col(aes(y = count, x = reorder (org_max, count)))+
   coord_flip()
 
+
+
 p_org
 
 
@@ -88,4 +95,35 @@ p_org
 
 ```
 
+```{r}
+
+lim_gov <- gov %>%
+  select(org_max,org_max_cod, ug, receita, despesa, resultado, absoluto, tag)%>%
+  filter ( org_max_cod == "22000")%>%
+  mutate (absoluto = abs(resultado))%>%
+  mutate (tag = if_else(rank(-absoluto) > 5,   "", ug)  )
+
+
+lims <- c(0, max(c(max(lim_gov$despesa),max(lim_gov$receita))))
+
+
+
+
+p_gov <- plot_ly(lim_gov)%>%
+  ggplot +
+  geom_point(aes ( x = despesa, y = receita, color = resultado,size = absoluto, label = ug))+
+  geom_text(aes ( x = despesa, y = receita, label = tag))+
+  scale_color_gradient2(midpoint=0, low="red", mid="gray",
+                     high="blue", space ="Lab" )+
+    geom_abline() +
+    scale_x_continuous("Despesa", limits = lims) +
+    scale_y_continuous("Receita", limits = lims) +
+    theme(aspect.ratio = 1)
+
+chart_link = api_create(p_gov, filename="ugs")
+chart_link 
+  
+
+p_gov
+```
 
