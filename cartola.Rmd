@@ -44,7 +44,7 @@ clubes<- clubes%>%
 ```{r}
 
 
-lims <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
+lims_clube <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
 
 p_clubes <-  ggplot (clubes) +
   geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto, label = clube))+
@@ -52,11 +52,11 @@ p_clubes <-  ggplot (clubes) +
   scale_color_gradient2(midpoint=0, low="red", mid="gray",
                      high="blue", space ="Lab" )+
     geom_abline() +
-    scale_x_continuous("Despesa", limits = lims) +
-    scale_y_continuous("Receita", limits = lims) 
-pc <- ggplotly(p_clubes)
+    scale_x_continuous("Despesa", limits = lims_clube) +
+    scale_y_continuous("Receita", limits = lims_clube) 
+(p_clubes <- ggplotly(p_clubes))
 
-pc
+
 
 
 ```
@@ -84,10 +84,10 @@ gov%>% group_by(org_max, org_max_cod)%>%
 
 
 
-gov_s<-gov%>%
-  select(poder,org_max,org,uf,ug,ug_cod, receita, despesa, resultado)
 
-datatable(gov_s, filter = 'top', options = list(  pageLength = 5, autoWidth = TRUE, style = "default", width = 1200))
+
+datatable(gov%>%  select(poder,org_max,org,uf,ug,ug_cod, receita, despesa, resultado),
+          filter = 'top', options = list(  pageLength = 5, autoWidth = TRUE, style = "default", width = 1200))
 
 p_org<- gov%>%
   group_by(org_max)%>%
@@ -98,9 +98,9 @@ p_org<- gov%>%
 
 
 
-po <- ggplotly(p_org)
+(p_org <- ggplotly(p_org))
 
-po
+
 
 
 
@@ -115,7 +115,7 @@ lim_gov <- gov %>%
   mutate (tag = if_else(rank(-absoluto) > 5,   "", ug_cod)  )
 
 
-lims <- c(0, max(c(max(lim_gov$despesa),max(lim_gov$receita))))
+lims_gov <- c(0, max(c(max(lim_gov$despesa),max(lim_gov$receita))))
 
 #lim_gov$tag <- gsub(" ", "\n", lim_gov$tag)
 #levels(lim_gov$ug) <- gsub(" ", "\n", levels(lim_gov$ug))
@@ -127,18 +127,22 @@ p_gov <-   ggplot (lim_gov) +
   scale_color_gradient2(midpoint=0, low="red", mid="gray",
                      high="blue", space ="Lab" )+
     geom_abline() +
-    scale_x_continuous("Despesa", limits = lims) +
-    scale_y_continuous("Receita", limits = lims)
+    scale_x_continuous("Despesa", limits = lims_gov) +
+    scale_y_continuous("Receita", limits = lims_gov)
 
  
   
-pg <- ggplotly(p_gov) 
+(p_gov <- ggplotly(p_gov) )
 
 
-pg
 
 
 
 ```
 
+
+
+```{r}
+
+```
 
