@@ -21,6 +21,7 @@ library(ggplot2)
 library(stringr)
 library(plotly)
 library(ggrepel)
+library(DT)
 ```
 
 
@@ -64,6 +65,11 @@ pc
 gov <- read_excel("org.xlsx")
 colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org_sup", "org_cod","org","uf","uf_nome","muni_cod","muni","ug_cod","ug","despesa","receita","resultado")
 
+gov$receita <- round(gov$receita/1000000,1)
+gov$despesa <- round(gov$despesa/1000000,1)
+gov$resultado <- round(gov$resultado/1000000,1)
+
+
 
 
 
@@ -75,6 +81,13 @@ colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org
 gov%>% group_by(org_max, org_max_cod)%>%
   summarise( count = n())%>%
   arrange(desc(count))
+
+
+
+gov_s<-gov%>%
+  select(poder,org_max,org,uf,ug,ug_cod, receita, despesa, resultado)
+
+datatable(gov_s, filter = 'top', options = list(  pageLength = 5, autoWidth = TRUE, style = "default", width = 1200))
 
 p_org<- gov%>%
   group_by(org_max)%>%
