@@ -39,28 +39,25 @@ clubes<- clubes%>%
 
 [https://vuorre.netlify.com/post/2017/01/04/how-to-create-within-subject-scatter-plots-in-r-with-ggplot2/]
 
+
 ```{r}
+
 
 lims <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
 
-
-
-
-p_clubes <- plot_ly(clubes)%>%
-  ggplot +
+p_clubes <-  ggplot (clubes) +
   geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto, label = clube))+
-  geom_text(aes ( x = despesa, y = receita, label = tag, hjust=0, vjust=0, size = 3))+
+  geom_text(aes ( x = despesa, y = receita, label = tag))+
   scale_color_gradient2(midpoint=0, low="red", mid="gray",
                      high="blue", space ="Lab" )+
     geom_abline() +
     scale_x_continuous("Despesa", limits = lims) +
-    scale_y_continuous("Receita", limits = lims) +
-    theme(aspect.ratio = 1)
- 
-chart_link = api_create(p_clubes, filename="clubes")
-chart_link  
+    scale_y_continuous("Receita", limits = lims) 
+pc <- ggplotly(p_clubes)
 
-p_clubes  %>% style(textposition = "right")
+pc
+
+
 ```
 
 ```{r}
@@ -130,23 +127,5 @@ pg
 
 
 ```
-```{r}
 
-
-lims <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
-
-p_clubes <-  ggplot (clubes) +
-  geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto, label = clube))+
-  geom_text(aes ( x = despesa, y = receita, label = tag))+
-  scale_color_gradient2(midpoint=0, low="red", mid="gray",
-                     high="blue", space ="Lab" )+
-    geom_abline() +
-    scale_x_continuous("Despesa", limits = lims) +
-    scale_y_continuous("Receita", limits = lims) 
-pc <- ggplotly(p_clubes)
-
-pc
-
-
-```
 
