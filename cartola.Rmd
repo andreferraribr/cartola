@@ -49,7 +49,7 @@ lims <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
 p_clubes <- plot_ly(clubes)%>%
   ggplot +
   geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto, label = clube))+
-  geom_text(aes ( x = despesa, y = receita, label = tag))+
+  geom_text(aes ( x = despesa, y = receita, label = tag, hjust=0, vjust=0, size = 3))+
   scale_color_gradient2(midpoint=0, low="red", mid="gray",
                      high="blue", space ="Lab" )+
     geom_abline() +
@@ -60,7 +60,7 @@ p_clubes <- plot_ly(clubes)%>%
 chart_link = api_create(p_clubes, filename="clubes")
 chart_link  
 
-p_clubes
+p_clubes  %>% style(textposition = "right")
 ```
 
 ```{r}
@@ -75,11 +75,11 @@ colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org
 
 ```{r}
 
-gov%>% group_by(org_max)%>%
+gov%>% group_by(org_max, org_max_cod)%>%
   summarise( count = n())%>%
   arrange(desc(count))
 
-p_org<- plot_ly(gov)%>%
+p_org<- gov%>%
   group_by(org_max)%>%
   summarise( count = n())%>%
   ggplot+
@@ -88,7 +88,9 @@ p_org<- plot_ly(gov)%>%
 
 
 
-p_org
+po <- ggplotly(p_org)
+
+po
 
 
 
@@ -98,32 +100,53 @@ p_org
 ```{r}
 
 lim_gov <- gov %>%
-  select(org_max,org_max_cod, ug, receita, despesa, resultado, absoluto, tag)%>%
-  filter ( org_max_cod == "22000")%>%
+  filter ( org_max_cod != "01000")%>%
   mutate (absoluto = abs(resultado))%>%
-  mutate (tag = if_else(rank(-absoluto) > 5,   "", ug)  )
+  mutate (tag = if_else(rank(-absoluto) > 5,   "", ug_cod)  )
 
 
 lims <- c(0, max(c(max(lim_gov$despesa),max(lim_gov$receita))))
 
+#lim_gov$tag <- gsub(" ", "\n", lim_gov$tag)
+#levels(lim_gov$ug) <- gsub(" ", "\n", levels(lim_gov$ug))
 
 
-
-p_gov <- plot_ly(lim_gov)%>%
-  ggplot +
+p_gov <-   ggplot (lim_gov) +
   geom_point(aes ( x = despesa, y = receita, color = resultado,size = absoluto, label = ug))+
   geom_text(aes ( x = despesa, y = receita, label = tag))+
   scale_color_gradient2(midpoint=0, low="red", mid="gray",
                      high="blue", space ="Lab" )+
     geom_abline() +
     scale_x_continuous("Despesa", limits = lims) +
-    scale_y_continuous("Receita", limits = lims) +
-    theme(aspect.ratio = 1)
+    scale_y_continuous("Receita", limits = lims)
 
-chart_link = api_create(p_gov, filename="ugs")
-chart_link 
+ 
   
+pg <- ggplotly(p_gov) 
 
-p_gov
+
+pg
+
+
+
+```
+```{r}
+
+
+lims <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
+
+p_clubes <-  ggplot (clubes) +
+  geom_point(aes ( x = despesa, y = receita, color = resultado, size = absoluto, label = clube))+
+  geom_text(aes ( x = despesa, y = receita, label = tag))+
+  scale_color_gradient2(midpoint=0, low="red", mid="gray",
+                     high="blue", space ="Lab" )+
+    geom_abline() +
+    scale_x_continuous("Despesa", limits = lims) +
+    scale_y_continuous("Receita", limits = lims) 
+pc <- ggplotly(p_clubes)
+
+pc
+
+
 ```
 
