@@ -2,8 +2,9 @@
 title: "Cartola"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: rows
+    orientation: columns
     vertical_layout: fill
+    runtime: shiny
     social: ["twitter", "facebook", "menu"]
 ---
 
@@ -74,13 +75,17 @@ lims_cartola <- c(0, max(c(max(cartola$despesa),max(cartola$receita))))
 ```
 
 Selecione o período {.sidebar}
-=======================================================================
+========================
 
 
+###### Valor da despesa
 
-
-
-
+```{r}
+sliderInput("despesa", "",
+                        min = min(cartola$despesa), max = max(cartola$despesa),
+                        value = c(min(cartola$despesa), max = max(cartola$despesa)),
+                        step = 1)
+```
 
 Grafico
 ========================
