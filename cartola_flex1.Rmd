@@ -1,5 +1,5 @@
 ---
-title: "Cartola"
+title: "Cartola 2018"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -40,9 +40,9 @@ clubes<- clubes%>%
 
 gov <- read_excel("org.xlsx")
 
-colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org_sup", "org_cod","org","uf","uf_nome","muni_cod","muni","ug_cod","ug","despesa","receita","resultado")
+colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org_sup", "org_cod","grupo","uf","uf_nome","muni_cod","muni","ug_cod","ug","despesa","receita","resultado")
 
-gov<-gov%>% mutate (grupo = "gov")%>%
+gov<-gov%>% 
   mutate(forma = 2 )%>%
   mutate (absoluto = abs(resultado))
 
@@ -61,7 +61,7 @@ colnames(clube_join)[1]<-"nome"
 
 
 gov_join<- gov%>%
-  select(ug_cod,uf,receita, despesa, resultado, absoluto, org, forma)%>%
+  select(ug_cod,uf,receita, despesa, resultado, absoluto, grupo, forma)%>%
   mutate(tam = 1)%>%
   mutate (tag = if_else(rank(-absoluto) > 5,   "", ug_cod)  )
 
@@ -147,7 +147,7 @@ gov_join_s <- gov_join %>% filter(nome == input$nome)
   
 cartola_s<- full_join(gov_join_s, clube_join)
 
-datatable(cartola_s%>%  select(nome,grupo, uf, receita, despesa, resultado),
+datatable(cartola_s%>%  select(nome, uf, receita, despesa, resultado),
           filter = 'top', options = list(  pageLength = 25, autoWidth = TRUE, style = "default", width = 1200))
 })
 ```
