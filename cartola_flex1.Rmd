@@ -15,12 +15,8 @@ library(readxl)
 library(ggplot2)
 library(stringr)
 library(plotly)
-library(ggrepel)
 library(DT)
-library (rpivotTable)
 library(flexdashboard)
-library(openintro)
-library(highcharter)
 library(knitr)
 library(shiny)
 ```
@@ -34,36 +30,36 @@ clubes <- read_excel("clubes.xlsx")
 clubes<- clubes%>%
   mutate (despesa = receita - resultado)%>%
   mutate (absoluto = abs(resultado))%>%
-  mutate (tag = if_else(rank(-absoluto) > 5,   "", clube)  )%>%
-  mutate (grupo = "cbf")%>%
-  mutate(forma = 19)
+  mutate (grupo = "cbf")
 
 gov <- read_excel("org.xlsx")
 
-colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org_sup", "org_cod","grupo","uf","uf_nome","muni_cod","muni","ug_cod","ug","despesa","receita","resultado")
+colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org_sup", "org_cod","org","uf","uf_nome","muni_cod","muni","ug_cod","tag","despesa","receita","resultado")
 
-gov<-gov%>% 
-  mutate(forma = 2 )%>%
-  mutate (absoluto = abs(resultado))
+
 
 gov$receita <- round(gov$receita/1000000,1)
 gov$despesa <- round(gov$despesa/1000000,1)
 gov$resultado <- round(gov$resultado/1000000,1)
 
-
+gov<-gov%>% 
+  mutate (absoluto = abs(resultado))
 
 clube_join<- clubes%>%
-  select(clube, uf,receita, despesa, resultado, absoluto, tag, grupo, forma)%>%
-  mutate(tam = absoluto/10)
+  select(clube, uf,receita, despesa, resultado, absoluto)%>%
+  mutate (org = "cbf")%>%
+  mutate (tag = clube)
 
 
 colnames(clube_join)[1]<-"nome" 
 
 
 gov_join<- gov%>%
-  select(ug_cod,uf,receita, despesa, resultado, absoluto, grupo, forma)%>%
-  mutate(tam = 1)%>%
-  mutate (tag = if_else(rank(-absoluto) > 5,   "", ug_cod)  )
+  select(ug_cod,uf,receita, despesa, resultado, absoluto, org, tag)
+
+gov_join$tag <- gsub(" ", "\n", gov_join$tag)
+levels(gov_join$tag) <- gsub(" ", "\n", levels(gov_join$tag))
+  
 
 colnames(gov_join)[1]<-"nome" 
 
@@ -78,10 +74,10 @@ Selecione o período {.sidebar}
 ========================
 
 
-###### Valor da despesa
+###### 
 
 ```{r}
-selectizeInput("nome", "nome", unique (gov_join$nome), selected = "170166", multiple = FALSE,
+selectizeInput("nome", "Escolha a UG", unique (gov_join$nome), selected = "170166", multiple = FALSE,
                options = NULL)
 ```
 
@@ -91,10 +87,10 @@ selectizeInput("nome", "nome", unique (gov_join$nome), selected = "170166", mult
 UG x Clubes
 ========================
 
-Column {data-width=650}
+Column {data-width=1000}
 -----------------------------------------------------------------------
 
-### Chart A
+### Campeonato de 2018: UG x Clubes (R$ milhão)
 
 ```{r}
 
@@ -111,12 +107,12 @@ cartola_s<- full_join(gov_join_s, clube_join)
 lims_cartola <- c(0, max(c(max(cartola_s$despesa),max(cartola_s$receita))))
 
 p_cartola <-   ggplot (cartola_s) +
-  geom_point(aes ( shape = forma, x = despesa, y = receita, color = resultado,size = tam, label = nome))+
-  geom_text(aes ( x = despesa, y = receita, label = nome))+
+  geom_point(aes ( x = despesa, y = receita, color = resultado,size = absoluto, label = tag))+
   scale_color_gradient2(midpoint=0, low="red", mid="gray",
                      high="blue", space ="Lab" )+
     scale_shape_identity()+
-    geom_abline() +
+  geom_text(aes ( x = despesa, y = receita, label = tag))+
+  geom_abline() +
     scale_x_continuous("Despesa", limits = lims_cartola ) +
     scale_y_continuous("Receita", limits = lims_cartola )
 
@@ -136,7 +132,7 @@ p_cartola <-   ggplot (cartola_s) +
 
 
 
-### Tabela
+### Comparativo 2018 (R$ milhão) {data-width=220}
 
 
 ```{r}
@@ -147,16 +143,17 @@ gov_join_s <- gov_join %>% filter(nome == input$nome)
   
 cartola_s<- full_join(gov_join_s, clube_join)
 
-datatable(cartola_s%>%  select(nome, uf, receita, despesa, resultado),
-          filter = 'top', options = list(  pageLength = 25, autoWidth = TRUE, style = "default", width = 1200))
+datatable(cartola_s%>%  select(nome, receita, despesa, resultado),
+          filter = 'top', options = list(  pageLength = 25, autoWidth = TRUE, style = "default", width = 300))
 })
 ```
 
 
 
-Ranking
+Ranking Geral
 ========================
 
+### Ranking Geral 2018 (R$ milhão)
 
 ```{r}
 renderDT({
