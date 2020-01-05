@@ -37,7 +37,11 @@ clubes<- clubes%>%
   mutate (absoluto = abs(resultado))%>%
   mutate (tag = if_else(rank(-absoluto) > 5,   "", clube)  )%>%
   mutate (grupo = "cbf")%>%
-  mutate(forma = 19)
+  mutate(forma = 19)%>%
+  mutate (cor_ponto = case_when(
+                  resultado > 0 ~ "positivo",
+                  resultado == 0 ~ "nulo",
+                  resultado < 0 ~ "negativo" ))
 ```
 
 [https://vuorre.netlify.com/post/2017/01/04/how-to-create-within-subject-scatter-plots-in-r-with-ggplot2/]
@@ -49,15 +53,21 @@ clubes<- clubes%>%
 lims_clube <- c(0, max(c(max(clubes$despesa),max(clubes$receita))))
 
 p_clubes <-  ggplot (clubes) +
-  geom_point(aes (shape = forma, x = despesa, y = receita, color = resultado, size = absoluto, label = clube))+
-  geom_text(aes ( x = despesa, y = receita, label = tag))+
-  scale_color_gradient2(midpoint=0, low="red", mid="gray",
-                     high="blue", space ="Lab" )+
+  geom_point(aes (shape = forma, x = despesa, y = receita,
+                  color =  cor_ponto,
+                  alpha = 0.3,
+                  size = absoluto,
+                  label = clube))+
+  scale_color_manual("resultado", values = c("positivo" = "blue", "nulo" = "gray", "negativo" = "red"))+
+  geom_text(aes ( x = despesa, y = receita, label = clube))+
     scale_shape_identity()+
-    geom_abline() +
+    geom_abline(alpha = 0.2) +
     scale_x_continuous("Despesa", limits = lims_clube) +
-    scale_y_continuous("Receita", limits = lims_clube) 
-(p_clubes <- ggplotly(p_clubes))
+    scale_y_continuous("Receita", limits = lims_clube) +
+    theme_minimal()
+(p_clubes <- ggplotly(p_clubes))%>%
+  layout(showlegend = FALSE)
+  
 
 
 
@@ -71,7 +81,11 @@ colnames(gov)<- c("poder_cod","poder","org_max_cod","org_max","org_sup_cod","org
 
 gov<-gov%>% mutate (grupo = "gov")%>%
   mutate(forma = 2 )%>%
-  mutate (absoluto = abs(resultado))
+  mutate (absoluto = abs(resultado))%>%
+  mutate (cor_ponto = case_when(
+                  resultado > 0 ~ "positivo",
+                  resultado == 0 ~ "nulo",
+                  resultado < 0 ~ "negativo" ))
 
 gov$receita <- round(gov$receita/1000000,1)
 gov$despesa <- round(gov$despesa/1000000,1)
@@ -130,18 +144,19 @@ lims_gov <- c(0, max(c(max(lim_gov$despesa),max(lim_gov$receita))))
 
 
 p_gov <-   ggplot (lim_gov) +
-  geom_point(aes ( shape = forma, x = despesa, y = receita, color = resultado,size = absoluto, label = ug))+
+  geom_point(aes ( shape = forma, x = despesa, y = receita, color = cor_ponto,size = absoluto, label = ug, alpha = 0.5))+
   geom_text(aes ( x = despesa, y = receita, label = tag))+
-  scale_color_gradient2(midpoint=0, low="red", mid="gray",
-                     high="blue", space ="Lab" )+
+  scale_color_manual("resultado", values = c("positivo" = "blue", "nulo" = "gray", "negativo" = "red"))+
     scale_shape_identity()+
-    geom_abline() +
+    geom_abline( alpha = 0.3) +
     scale_x_continuous("Despesa", limits = lims_gov) +
-    scale_y_continuous("Receita", limits = lims_gov)
+    scale_y_continuous("Receita", limits = lims_gov) +
+    theme_minimal()
 
  
   
-(p_gov <- ggplotly(p_gov) )
+(p_gov <- ggplotly(p_gov) )%>%
+  layout(showlegend = FALSE)
 
 
 
@@ -153,10 +168,10 @@ p_gov <-   ggplot (lim_gov) +
 
 ```{r}
 
-gov_s<-gov%>% filter (ug_cod == "170166")
+gov_s<-gov
 
 clube_join<- clubes%>%
-  select(clube, uf,receita, despesa, resultado, absoluto, tag, grupo, forma)%>%
+  select(clube, uf,receita, despesa, resultado, absoluto, tag, grupo, forma, cor_ponto)%>%
   mutate(tam = absoluto/10)
 
 
@@ -164,7 +179,7 @@ colnames(clube_join)[1]<-"nome"
 
 
 gov_join<- gov_s%>%
-  select(ug_cod,uf,receita, despesa, resultado, absoluto, grupo, forma)%>%
+  select(ug_cod,uf,receita, despesa, resultado, absoluto, grupo, forma, cor_ponto)%>%
   mutate(tam = 1)%>%
   mutate (tag = if_else(rank(-absoluto) > 5,   "", ug_cod)  )
 
@@ -186,18 +201,19 @@ lims_cartola <- c(0, max(c(max(cartola$despesa),max(cartola$receita))))
 
 
 p_cartola <-   ggplot (cartola) +
-  geom_point(aes ( shape = forma, x = despesa, y = receita, color = resultado,size = tam, label = nome))+
+  geom_point(aes ( shape = forma, x = despesa, y = receita, color = cor_ponto,size = tam, label = nome, alpha = 0.3))+
   geom_text(aes ( x = despesa, y = receita, label = tag))+
-  scale_color_gradient2(midpoint=0, low="red", mid="gray",
-                     high="blue", space ="Lab" )+
+  scale_color_manual("resultado", values = c("positivo" = "blue", "nulo" = "gray", "negativo" = "red"))+
     scale_shape_identity()+
-    geom_abline() +
+    geom_abline( alpha = 0.3) +
     scale_x_continuous("Despesa", limits = lims_cartola ) +
-    scale_y_continuous("Receita", limits = lims_cartola )
+    scale_y_continuous("Receita", limits = lims_cartola ) +
+    theme_minimal()
 
  
   
-(p_cartola <- ggplotly(p_cartola) )
+(p_cartola <- ggplotly(p_cartola) )%>%
+  layout(showlegend = FALSE)
 
 ```
 

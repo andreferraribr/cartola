@@ -48,14 +48,24 @@ gov<-gov%>%
 clube_join<- clubes%>%
   select(clube, uf,receita, despesa, resultado, absoluto)%>%
   mutate (org = "cbf")%>%
-  mutate (tag = clube)
+  mutate (tag = clube)%>%
+  mutate (cor_ponto = case_when(
+    resultado > 0 ~ "positivo",
+    resultado == 0 ~ "nulo",
+    resultado < 0 ~ "negativo"))%>%
+    mutate (cor_texto = "black")
 
 
 colnames(clube_join)[1]<-"nome" 
 
 
 gov_join<- gov%>%
-  select(ug_cod,uf,receita, despesa, resultado, absoluto, org, tag)
+  select(ug_cod,uf,receita, despesa, resultado, absoluto, org, tag)%>%
+  mutate (cor_ponto = case_when(
+    resultado > 0 ~ "positivo",
+    resultado == 0 ~ "nulo",
+    resultado < 0 ~ "negativo"))%>%
+    mutate (cor_texto = "green")
 
 gov_join$tag <- gsub(" ", "\n", gov_join$tag)
 levels(gov_join$tag) <- gsub(" ", "\n", levels(gov_join$tag))
@@ -98,27 +108,30 @@ Column {data-width=1000}
 renderPlotly({
 
   
-gov_join_s <- gov_join %>% filter(nome == input$nome)
-  
-cartola_s<- full_join(gov_join_s, clube_join)
 
+  
+cartola_s<- cartola %>% filter (nome == input$nome | org == "cbf")
 
   
 lims_cartola <- c(0, max(c(max(cartola_s$despesa),max(cartola_s$receita))))
 
 p_cartola <-   ggplot (cartola_s) +
-  geom_point(aes ( x = despesa, y = receita, color = resultado,size = absoluto, label = tag))+
-  scale_color_gradient2(midpoint=0, low="red", mid="gray",
-                     high="blue", space ="Lab" )+
+  geom_point(aes ( x = despesa, y = receita,
+    color =  cor_ponto,
+    size = absoluto, label = tag))+
     scale_shape_identity()+
-  geom_text(aes ( x = despesa, y = receita, label = tag))+
-  geom_abline() +
+  geom_text(aes ( x = despesa, y = receita, label = tag, color = cor_texto))+
+  scale_color_manual("resultado", values = c("positivo" = "blue", "nulo" = "gray", "negativo" = "red", "black" = "black", "green" = "green"))+
+  geom_abline(alpha = 0.3) +
     scale_x_continuous("Despesa", limits = lims_cartola ) +
-    scale_y_continuous("Receita", limits = lims_cartola )
+    scale_y_continuous("Receita", limits = lims_cartola ) +
+    theme_minimal()
 
  
   
-(p_cartola <- ggplotly(p_cartola) )
+(p_cartola <- ggplotly(p_cartola) )%>%
+  layout(showlegend = FALSE)
+  
 
 })
 
@@ -162,7 +175,7 @@ renderDT({
   
 
 
-datatable(cartola%>%  select(nome,grupo, uf, receita, despesa, resultado),
+datatable(cartola%>%  select(nome,org, uf, receita, despesa, resultado),
           filter = 'top', options = list(  pageLength = 25, autoWidth = TRUE, style = "default", width = 1200))
 })
 ```
