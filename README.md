@@ -1,2 +1,2 @@
 # cartola
-comparar receita e despesas dos maiores clubes de futebol e dos órgãos do governo federal
+Quem tem mais receita? Quem tem mais despesa? Os clubes de futebol ou os órgãos do governo federal?
